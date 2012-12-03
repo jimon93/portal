@@ -17,9 +17,10 @@
     iWin = iframe.contentWindow
     iDoc = iWin.document
 
+    iWin.foo = "foo"
     iDoc.open()
     iDoc.write(src)
-    iDoc.close
+    iDoc.close()
     return $(iframe)
 
 )(jQuery)
@@ -27,14 +28,18 @@
 window.src = """
 <!DOCTYPE html>
 <html>
+<head>
+<script src="/js/jquery-1.8.3.js"></script>
+</head>
 <body style='background-color:red'>
 <h1>hello</h1>
 <script>
-var n = Math.floor( Math.random() * 12 );
-console.log(n);
-for(var i=0;i<n;i++){
-  write("<h1>hello</h1>");
-}
+$(function(){
+  alert(foo);
+  //for(var i=0;i<n;i++){
+  //  document.write("<h1>hello</h1>");
+  //}
+});
 </script>
 </body>
 </html>

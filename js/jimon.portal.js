@@ -16,13 +16,14 @@
       $(this)[opt.method](iframe);
       iWin = iframe.contentWindow;
       iDoc = iWin.document;
+      iWin.foo = "foo";
       iDoc.open();
       iDoc.write(src);
-      iDoc.close;
+      iDoc.close();
       return $(iframe);
     };
   })(jQuery);
 
-  window.src = "<!DOCTYPE html>\n<html>\n<body style='background-color:red'>\n<h1>hello</h1>\n<script>\nvar n = Math.floor( Math.random() * 12 );\nconsole.log(n);\nfor(var i=0;i<n;i++){\n  write(\"<h1>hello</h1>\");\n}\n</script>\n</body>\n</html>";
+  window.src = "<!DOCTYPE html>\n<html>\n<head>\n<script src=\"/js/jquery-1.8.3.js\"></script>\n</head>\n<body style='background-color:red'>\n<h1>hello</h1>\n<script>\n$(function(){\n  alert(foo);\n  //for(var i=0;i<n;i++){\n  //  document.write(\"<h1>hello</h1>\");\n  //}\n});\n</script>\n</body>\n</html>";
 
 }).call(this);
