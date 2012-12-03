@@ -17,7 +17,6 @@
     iWin = iframe.contentWindow
     iDoc = iWin.document
 
-    iWin.hoge = "hoge"
     iDoc.open()
     iDoc.write(src)
     iDoc.close
@@ -25,30 +24,18 @@
 
 )(jQuery)
 
-# jQueryメソッドでいいんじゃないかな…
-#appendIframe = ( src, target, method = 'append', win = window, doc = document )->
-#  iframe = doc.createElement 'iframe'
-#  iframe.scrolling = 'no'
-#  iframe.frameBorder = '0'
-#  #iframe.height = '0'
-#  iframe.className = 'gadget'
-#
-#  target[method](iframe)
-#  iWin = iframe.contentWindow
-#  iDoc = iWin.document
-#
-#  iWin.hoge = "hoge"
-#  iDoc.open()
-#  iDoc.write(src)
-#  iDoc.close
-#  return iframe
-
-src = """
+window.src = """
 <!DOCTYPE html>
-  <html>
-  <body style='background-color:red'>
-  <h1>hello</h1>
-  <script>console.log("hello",hoge);</script>
-  </body>
-  </html>
+<html>
+<body style='background-color:red'>
+<h1>hello</h1>
+<script>
+var n = Math.floor( Math.random() * 12 );
+console.log(n);
+for(var i=0;i<n;i++){
+  write("<h1>hello</h1>");
+}
+</script>
+</body>
+</html>
 """
