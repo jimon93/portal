@@ -3,7 +3,7 @@
     defaults = {
       win : window
       doc : document
-      method : "replaceWith"
+      method : "append" # defaultsを一括で設定できるようにしよう
     }
     opt = $.extend(defaults,options)
 
@@ -13,19 +13,17 @@
     #iframe.height = '0'
     #iframe.className = 'gadget'
 
-    $(@)[opt.method](iframe)
+    this[opt.method](iframe)
     iWin = iframe.contentWindow
     iDoc = iWin.document
 
-    iWin.foo = "foo"
     iDoc.open()
     iDoc.write(src)
     iDoc.close()
     return $(iframe)
-
 )(jQuery)
 
-window.src = """
+src = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -35,12 +33,19 @@ window.src = """
 <h1>hello</h1>
 <script>
 $(function(){
-  alert(foo);
-  //for(var i=0;i<n;i++){
-  //  document.write("<h1>hello</h1>");
-  //}
+  //alert(foo);
+  var n = Math.floor( Math.random() * 10 );
+  for(var i=0;i<n;i++){
+    //document.write("<h1>hello</h1>");
+  }
 });
 </script>
 </body>
 </html>
 """
+
+$ ->
+  for i in [0...12]
+    n = Math.floor( Math.random() * 200 )
+    win = $("#main").iframe(src).addClass("span4 gadget").height(n+50)[0].contentWindow
+  $("#main").masonry { itemSelector: ".gadget" }
