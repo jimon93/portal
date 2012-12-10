@@ -11,6 +11,7 @@ get "/js/jimon.portal.js" do
     'sort_reload',
     'model',
     'view',
+    "routes",
     'jimon_portal'
   ]
   PATH = File.dirname(__FILE__) + "/coffee/"
@@ -22,5 +23,5 @@ get "/js/jimon.portal.js" do
 end
 
 get "/" do
-  haml :home
+  haml :home, :layout=>false
 end

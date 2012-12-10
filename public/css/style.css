@@ -4,9 +4,9 @@
 
 /* Default */
 @media (min-width: 980px) {
-	body{
-		margin-top: 60px;
-	}
+  body{
+    margin-top: 60px;
+  }
 }
 
 /* Portrait tablet to landscape and desktop */
@@ -20,21 +20,20 @@
 /* Landscape phones and down */
 @media (max-width: 480px) {
 }
+#home{
+  display:none;
+}
 .gadget{
-	margin-bottom: 20px;
-	list-style-type: none;
+  margin-bottom: 20px;
+  list-style-type: none;
 }
 .gadget .title{
-	margin-bottom: 0px;
-	-webkit-border-radius : 4px 4px 0 0;
-	-moz-border-radius    : 4px 4px 0 0;
-	border-radius         : 4px 4px 0 0;
+  margin-bottom: 0px;
+  -webkit-border-radius : 4px 4px 0 0;
+  -moz-border-radius    : 4px 4px 0 0;
+  border-radius         : 4px 4px 0 0;
 }
 .gadget iframe{
-	width: 100%;
-}
-.gadget .proxy-iframe{
-	//border:solid 1px;
-	background-color: #AAA;
+  width: 100%;
 }
 

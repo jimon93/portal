@@ -10,6 +10,7 @@
     %link{:rel=>"stylesheet",:href=>"/css/style.css"}
     %script{:type=>"text/javascript",:src=>"/js/jquery-1.8.3.js"}
     %script{:type=>"text/javascript",:src=>"/js/jquery-ui-1.9.2.custom.js"}
+    %script{:type=>"text/javascript",:src=>"/js/jquery.ui.touch-punch.js"}
     %script{:type=>"text/javascript",:src=>"/js/bootstrap.js"}
     %script{:type=>"text/javascript",:src=>"/js/jquery.masonry.js"}
     %script{:type=>"text/javascript",:src=>"/js/underscore.js"}
@@ -29,10 +30,8 @@
               %li.active
                 %a{:href=>"#"} Home
               %li
-                %a{:href=>"#about"} About
-              %li
-                %a{:href=>"#contact"} Contact
-    .container
+                %a{:href=>"#market"} Market
+    #home.container
       .row
         != yield
 

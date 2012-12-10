@@ -23,3 +23,22 @@ Gadgets = Backbone.Collection.extend {
   comparator:(gadget)->
     gadget.get('priority')
 }
+
+Responsive = Backbone.Model.extend {
+  initialize:->
+    _.bindAll @, 'resize'
+    $(window).resize @resize
+    @resize()
+
+  resize: (e)->
+    width = $(window).width()
+    if width >= 1200
+      @set('size','large')
+    else if width >= 980
+      @set('size','desktops')
+    else if width >= 768
+      @set('size','tablets')
+    else
+      @set('size','phones')
+    #console.log 'responsive', width, @get('size')
+}
