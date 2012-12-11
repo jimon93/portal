@@ -21,7 +21,7 @@
 @media (max-width: 480px) {
 }
 #home{
-  display:none;
+  /*display:none;*/
 }
 .gadget{
   margin-bottom: 20px;

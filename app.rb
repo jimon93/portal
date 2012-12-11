@@ -8,7 +8,7 @@ get "/js/jimon.portal.js" do
   COFFEE = [
     'utl',
     'iframe',
-    'sort_reload',
+    'extend_methods',
     'model',
     'view',
     "routes",
@@ -22,6 +22,6 @@ get "/js/jimon.portal.js" do
   coffee source
 end
 
-get "/" do
+get "*" do
   haml :home, :layout=>false
 end

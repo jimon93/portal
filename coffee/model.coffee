@@ -32,13 +32,16 @@ Responsive = Backbone.Model.extend {
 
   resize: (e)->
     width = $(window).width()
-    if width >= 1200
-      @set('size','large')
+    prevSize = @get( 'size' )
+    nextSize = if width >= 1200
+      'large'
     else if width >= 980
-      @set('size','desktops')
+      'desktops'
     else if width >= 768
-      @set('size','tablets')
+      'tablets'
     else
-      @set('size','phones')
+      'phones'
+    @set( 'size', nextSize )
+    @trigger( 'changed:size', @ ) if prevSize != nextSize
     #console.log 'responsive', width, @get('size')
 }

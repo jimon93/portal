@@ -28,19 +28,19 @@
           .nav-callapse.callapse
             %ul.nav
               %li.active
-                %a{:href=>"#"} Home
+                %a{:href=>"/#home"} Home
               %li
-                %a{:href=>"#market"} Market
+                %a{:href=>"/#market"} Market
     #home.container
       -# HomeView
       .row
         .sub
           #home-view-switch.btn-toolbar.hidden-phone
             .btn-group{"data-toggle"=>"buttons-radio"}
-              %a#list.btn
+              %a#list.btn{:href=>"#list"}
                 %i.icon-list
                 リスト
-              %a#grid.btn
+              %a#grid.btn{:href=>"#"}
                 %i.icon-th
                 ミニビュー
           %ul#gadgets-nav.nav.nav-tabs.nav-stacked
