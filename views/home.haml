@@ -28,9 +28,13 @@
           .nav-callapse.callapse
             %ul.nav
               %li.active
-                %a{:href=>"/#home"} Home
+                %a{:href=>"/#home"}
+                  %i.icon-home
+                  Home
               %li
-                %a{:href=>"/#market"} Market
+                %a{:href=>"/#market"}
+                  %i.icon-gift
+                  Market
     #home.container
       -# HomeView
       .row
@@ -46,3 +50,18 @@
           %ul#gadgets-nav.nav.nav-tabs.nav-stacked
         #gadgets.main
           .row
+    #templates
+      %script#gadget-header{:type=>"text/template"}
+        %p.title.alert.alert-info
+          <%= title %>
+      %script#gadget-menu{:type=>"text/template"}
+        .btn-group.pull-right
+          %a.btn.btn-info.dropdown-toggle{"data-toggle"=>"toggle",:href=>"#menu"}
+            %i.icon-tasks
+          %ul.dropdown-menu
+            %li
+              %a{:href=>"#hoge"} Action
+            %li
+              %a{:href=>"#hoge"} Action
+            %li
+              %a{:href=>"#hoge"} Action

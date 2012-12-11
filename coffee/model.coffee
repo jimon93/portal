@@ -1,12 +1,11 @@
-Config = Backbone.Model.extend {
+class Config extends Backbone.Model
   initialize:(object,usage)->
     if usage? and usage.length > 0
       keys = _(object).keys()
       diff = _.difference( keys, usage )
       @unset key for key in diff
-}
 
-Gadget = Backbone.Model.extend {
+class Gadget extends Backbone.Model
   initialize:->
     config = @get('config')
     @unset 'config', {silent:true}
@@ -15,16 +14,14 @@ Gadget = Backbone.Model.extend {
 
   save:->
     @get('user-config').save()
-}
 
-Gadgets = Backbone.Collection.extend {
+class Gadgets extends Backbone.Collection
   model: Gadget
 
   comparator:(gadget)->
     gadget.get('priority')
-}
 
-Responsive = Backbone.Model.extend {
+class Responsive extends Backbone.Model
   initialize:->
     _.bindAll @, 'resize'
     $(window).resize @resize
@@ -43,5 +40,3 @@ Responsive = Backbone.Model.extend {
       'phones'
     @set( 'size', nextSize )
     @trigger( 'changed:size', @ ) if prevSize != nextSize
-    #console.log 'responsive', width, @get('size')
-}

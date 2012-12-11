@@ -1,13 +1,14 @@
 # Home {{{
-Home = Backbone.Model.extend {
-  defaults:-> {
-  }
-} # }}}
+class Home extends Backbone.Model
+  change:(options)->
+    changes = _.extend({}, options.changes, @_silent)
+    #console.log "my change",changes
+    super
+    for key, val of changes when val
+      @trigger("changed:#{key}",@ ,@get(key), options)
+# }}}
 # HomeView {{{
-HomeView = Backbone.View.extend {
-  id: 'hoem'
-  className: 'container'
-
+class HomeView extends Backbone.View
   initialize:(options)->
     # bind
     _.bindAll @
@@ -33,9 +34,9 @@ HomeView = Backbone.View.extend {
       collection: @collection
       el: @$('#gadgets')
     }
-} # }}}
+# }}}
 # HomeSubView {{{
-HomeSubView = Backbone.View.extend {
+class HomeSubView extends Backbone.View
   initialize: (opt)->
     # bind
     _.bindAll @, 'resize'
@@ -65,13 +66,9 @@ HomeSubView = Backbone.View.extend {
     @$el.removeClass("span#{prev}").addClass("span#{next}")
     @$el.hide() if next == 0
     @span = next
-}
 # }}}
 # HomeViewSwitch {{{
-HomeViewSwitch = Backbone.View.extend {
-  id: 'home-view-switch'
-  className: 'btn-toolbar hidden-phone'
-
+class HomeViewSwitch extends Backbone.View
   initialize: (opt)->
     # bind
     _.bindAll @, "onMode"
@@ -85,11 +82,9 @@ HomeViewSwitch = Backbone.View.extend {
   onMode:->
     @$("##{@home.previous('mode')}").removeClass("active")
     @$("##{@home.get('mode')}").addClass("active")
-} # }}}
+# }}}
 # GadgetNavs {{{
-GadgetNavs = Backbone.View.extend {
-  id:'gadgets-nav'
-  className: 'nav nav-tabs nav-stacked'
+class GadgetNavs extends Backbone.View
   tagName: 'ul'
 
   sortable_options : -> {
@@ -138,9 +133,9 @@ GadgetNavs = Backbone.View.extend {
     }
     (model)-> model.id
   )
-} # }}}
+# }}}
 # GadgetNavsItem {{{
-GadgetNavItem = Backbone.View.extend {
+class GadgetNavItem extends Backbone.View
   tagName: 'li'
 
   initialize : (opt)->
@@ -164,13 +159,9 @@ GadgetNavItem = Backbone.View.extend {
     #@router.navigate( "gadget/#{@model.id}", {trigger:true} )
     @router.navigate("gadget/#{@model.id}",{trigger:true})
     return false
-} # }}}
+# }}}
 # GadgetIframes {{{
-GadgetIframes = Backbone.View.extend {
-  tagName: 'div'
-  className: 'row'
-  id:'gadgets'
-
+class GadgetIframes extends Backbone.View
   initialize: (opt)->
     # bind
     _.bindAll( @
@@ -213,18 +204,16 @@ GadgetIframes = Backbone.View.extend {
 
   # fixElement
   setPlace: (animate = true)->
-    #console.info 'setPlace'
+    console.info 'setPlace'
     switch @home.get('mode')
       when 'grid'
         @$row.masonry 'option', {isAnimated: false} if !animate
         @$row.masonry('sortreload')
         @$row.masonry 'option', {isAnimated: true}  if !animate
-        #@$row.hide().stop().fadeIn()
       when 'full'
         @$row.masonry 'option', {isAnimated: false}
         @$row.masonry('sortreload')
         @$row.masonry 'option', {isAnimated: true}
-        #@$row.hide().stop().fadeIn()
 
   resize:->
     #console.log "main resize"
@@ -253,9 +242,9 @@ GadgetIframes = Backbone.View.extend {
     }
     (model)-> model.id
   )
-} # }}}
+# }}}
 # GadgetIframe {{{
-GadgetIframe = Backbone.View.extend {
+class GadgetIframe extends Backbone.View
   tagName: 'div'
   className: 'gadget'
 
@@ -277,10 +266,17 @@ GadgetIframe = Backbone.View.extend {
 
   render:->
     @$el.children().detach()
+    ###
     @title = $("<p/>")
       .text(@model.get 'title')
       .addClass("alert alert-info title")
       .appendTo @$el
+    ###
+    @title = $(
+      _.template $("#gadget-header").html(), @model.toJSON()
+    ).appendTo @$el
+    @menu = $(_.template( $("#gadget-menu").html(), @model.toJSON() ))
+    @menu.appendTo @title
     @iframe = @$el.iframe(@_makeSrc()).monitor()
     return @
 
@@ -320,5 +316,4 @@ GadgetIframe = Backbone.View.extend {
     @$el.removeClass("span#{prev}").addClass("span#{next}")
     @$el.hide() if next == 0
     @span = next
-}
 # }}}
