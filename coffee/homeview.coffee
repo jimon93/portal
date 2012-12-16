@@ -157,15 +157,15 @@ class GadgetIframes extends HomeBaseView
     # bind
     _.bindAll( @, 'replace')
     # event
-    @collection.on 'reset', @render
-    @collection.on 'add', @add
-    @collection.on 'sorted', @replace
-    @home.on "change:mode", @resize
-    @home.on "change:focus", @resize
-    @home.on "changed:mode", @replace
-    @home.on "changed:focus", @replace
-    @responsive.on "change:size", @resize
-    @responsive.on 'changed:size', @replace
+    @collection . on( 'reset'         , @render )
+    @collection . on( 'add'           , @add )
+    @collection . on( 'sorted'        , @replace )
+    @home       . on( "change:mode"   , @resize )
+    @home       . on( "change:focus"  , @resize )
+    @home       . on( "changed:mode"  , @replace )
+    @home       . on( "changed:focus" , @replace )
+    @responsive . on( "change:size"   , @resize )
+    @responsive . on( 'changed:size'  , @replace )
     # init
     $.iframeMonitor.option { callback : @replace }
   #}}}
@@ -178,7 +178,9 @@ class GadgetIframes extends HomeBaseView
   #}}}
   add:(model)-> #{{{
     df( "add", @ )
-    super
+    view = super
+    view.on("change:height", @replace)
+    view.on("delete", @collection.remove, @collection)
     @replace(false)
   #}}}
   makeChildView: _.memoize( #{{{
@@ -217,6 +219,7 @@ class GadgetIframes extends HomeBaseView
             when 'phones' then 0
     super next
   #}}}
+
 # }}}
 # GadgetIframe {{{
 class GadgetIframe extends HomeBaseView
@@ -224,13 +227,8 @@ class GadgetIframe extends HomeBaseView
   className: "gadget"
   templateSelector: "#templates #gadget-header"
 
-  events : {
-    "click .title"            : "menuToggle"
-    "click .menu .config>a"   : "menuConfig"
-    "click .menu .resize>a"   : "menuResize"
-    "click .menu .minimize>a" : "menuMinimize"
-    "click .menu .maximize>a" : "menuMaximize"
-    "click .menu .delete>a"   : "menuDelete"
+  events:{
+    "click .title": -> @menu.toggle()
   }
 
   initialize : ->
@@ -240,42 +238,33 @@ class GadgetIframe extends HomeBaseView
     _.bindAll( @
       'makeSrc'
       'onRemove'
-      'menuToggle'
-      'menuSet'
-      'menuConfig'
-      'menuResize'
-      'menuMinimize'
-      'menuMaximize'
-      'menuDelete'
-      'menuFastHide'
-      'menuOnShow'
-      'menuOnHide'
+      'changedHeight'
+      'onMinimize'
+      'delete'
     )
     # field
-    @parent = @options.parent
+    @menu = new GadgetMenu { model: @model }
     # event
-    @model.on "remove", @onRemove
-    @home.on "change:mode", @resize
-    #@home.on 'change:mode', @menuSet
-    @home.on 'change:mode', @menuFastHide
-    @home.on "change:focus", @resize
-    @home.on 'change:focus', @menuSet
-    @home.on 'change:focus', @menuFastHide
-    @responsive.on "change:size", @resize
+    @model     .on( "remove"       , @onRemove )
+    @home      .on( "change:mode"  , @resize )
+    @home      .on( "change:mode"  , @onMinimize )
+    @home      .on( "change:focus" , @resize )
+    @home      .on( "change:focus" , @onMinimize ) # resize ‚Æ onMinimize‚Í“‡‚·‚é‚×‚«‚©
+    @responsive.on( "change:size"  , @resize )
+    @menu      .on( "show"         , @changedHeight )
+    @menu      .on( "hide"         , @changedHeight )
+    @menu      .on( "change:minimize", @onMinimize )
+    @menu      .on( "delete"       , @delete )
     # init
     @$el.data 'gadget', @model
-    @minimize = false
-    @resize()
 
   render:->
     df( "render", @ )
     super
-    @$(".menu").collapse({toggle:false})
+    @$el.append @menu.render()
+    @$el.append "<div class='content'/>"
     @iframe = @$('.content').iframe(@makeSrc()).monitor()
-    @menuSet()
-    @$(".menu")
-      .on("show", @menuOnShow)
-      .on("hide", @menuOnHide)
+    @resize()
     return @$el
 
   resize:->
@@ -297,22 +286,23 @@ class GadgetIframe extends HomeBaseView
             when 'phones' then 0
     super next
 
-  makeSrc:-> """
-  <!DOCTYPE html>
-  <html>
-  <head>
-  <link rel="stylesheet" href="/css/bootstrap.css">
-  <link rel="stylesheet" href="/css/bootstrap-responsive.css">
-  <style> body </style>
-  <script src="/js/jquery-1.8.3.js"></script>
-  </head>
-  <body>
-  #{@model.get 'content'}
-  </body>
-  </html>
-  """
-
-  onRemove:->
+  makeSrc:-> #{{{
+    """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/bootstrap-responsive.css">
+    <style> body </style>
+    <script src="/js/jquery-1.8.3.js"></script>
+    </head>
+    <body>
+    #{@model.get 'content'}
+    </body>
+    </html>
+    """
+  #}}}
+  onRemove:-> #{{{
     df( "onRemove", @ )
     $.iframeMonitor.remove @$("iframe")[0]
     @remove()
@@ -320,67 +310,135 @@ class GadgetIframe extends HomeBaseView
       next = if @home.get("mode") == "grid" then "" else "list"
       @router.navigate(next,{ trigger: true })
     else
-      @parent.replace()
-
-  menuToggle:->
-    df( "menuToggle", @ )
-    @$(".menu").collapse("toggle")
-
-  menuSet:->
-    df( "menuSet", @ )
+      @changedHeight(0)
+  #}}}
+  changedHeight:-> #{{{
+    df( "changedHeight", @ )
+    @trigger("change:height")
+  #}}}
+  onMinimize:-> #{{{
+    df( "onMinimize", @ )
     if @home.get("focus")?
-      @$(".menu .resize"  ).hide()
-      @$(".menu .minimize").hide()
-      @$(".menu .maximize").hide()
-      @$(".content").show()
-      @$(".title .navbar-inner").removeClass("single")
-    else if @home.get('mode') == "grid"
-      @$(".menu .resize"       )[if @minimize then 'show' else 'hide']()
-      @$(".menu .minimize"     )[if @minimize then 'hide' else 'show']()
-      @$(".menu .maximize").show()
-      @$(".content"            )[if @minimize then 'hide' else 'show']()
-      @$(".title .navbar-inner")[if @minimize then 'addClass' else 'removeClass']("single")
-
-  menuConfig:->
-    df( "menuConfig", @ )
-    @$(".menu").collapse("hide")
-
-  menuResize:->
-    df( "menuResize", @ )
-    @minimize = false
-    @menuSet()
-    @$(".menu").collapse("hide")
-
-  menuMinimize:->
-    df( "menuMinimize", @ )
-    @minimize = true
-    @menuSet()
-    @$(".menu").collapse("hide")
-
-  menuMaximize:->
-    df( "menuMaximize", @ )
-    @menuFastHide()
-
-  menuDelete:->
-    df( "menuDelete", @ )
-    @parent.collection.remove @model
-
-  menuFastHide:->
-    df( "menuFastHide", @ )
-    @$(".menu").height(0).removeClass("in")
-
-  menuOnShow: ->
-    df( "menuOnShow", @ )
-    menu = @$(".menu")
-    menu.height("auto")
-    @parent.replace("show")
-    menu.height(0)
-
-  menuOnHide: ->
-    df( "menuOnHide", @ )
-    menu = @$(".menu")
-    menu.hide()
-    @parent.replace("hide")
-    menu.show()
+      if @home.get("focus") == @model.id
+        @$(".content").show()
+        @$(".title .navbar-inner").removeClass("single")
+    else if @home.get("mode") == 'grid'
+      mode = @menu.minimizeMode
+      @$(".content")[if mode then "hide" else "show"]()
+      @$(".title .navbar-inner")[if mode then "addClass" else "removeClass"]("single")
+  #}}}
+  delete:-> #{{{
+    df( "delete", @ )
+    @trigger("delete",@model)
+  #}}}
 # }}}
+# GadgetMenu {{{
+class GadgetMenu extends HomeBaseView
+  className: [
+    "menu"
+    "well"
+    "collapse"
+  ].join(" ")
+  templateSelector: "#templates>#gadget-menu"
 
+  events: {
+    "click .config"   : "config"
+    "click .resize"   : "resize"
+    "click .minimize" : "minimize"
+    "click .maximize" : "maximize"
+    "click .delete"   : "delete"
+    "show"            : "onShow"
+    "hide"            : "onHide"
+  }
+
+  initialize: ->
+    df( "initialize", @ )
+    super
+    # bind
+    _.bindAll( @
+      'toggle'
+      'update'
+      'config'
+      'resize'
+      'minimize'
+      'maximize'
+      'delete'
+      'fastHide'
+      'onShow'
+      'onHide'
+    )
+    # field
+    @minimizeMode = false
+    # event
+    @home.on("change:mode" ,@update)
+    @home.on("change:focus",@update)
+    @home.on("change:mode" ,@fastHide)
+    @home.on("change:focus",@fastHide)
+    # init
+    @$el.collapse({toggle:false})
+
+  render:->
+    super
+    @update()
+    return @$el
+
+  toggle:->
+    df( "toggle", @ )
+    @$el.collapse("toggle")
+
+  update:->
+    df( "update", @ )
+    if @home.get("focus")?
+      @$(".resize"  ).hide()
+      @$(".minimize").hide()
+      @$(".maximize").hide()
+    else if @home.get('mode') == "grid"
+      @$(".resize"  )[if @minimizeMode then 'show' else 'hide']()
+      @$(".minimize")[if @minimizeMode then 'hide' else 'show']()
+      @$(".maximize").show()
+
+  config:->
+    df( "config", @ )
+    @$el.collapse("hide")
+
+  resize:->
+    df( "resize", @ )
+    @minimizeMode = false
+    @update()
+    @trigger("change:minimize",false)
+    @$el.collapse("hide")
+
+  minimize:->
+    df( "minimize", @ )
+    @minimizeMode = true
+    @update()
+    @trigger("change:minimize",true)
+    @$el.collapse("hide")
+
+  maximize:->
+    df( "maximize", @ )
+    @fastHide()
+
+  delete:->
+    df( "delete", @ )
+    @trigger("delete")
+    #collection.remove @model
+
+  fastHide:->
+    df( "fastHide", @ )
+    @$el.height(0).removeClass("in")
+
+  onShow: ->
+    df( "onShow", @ )
+    @$el.height("auto")
+    #@parent.replace("show")
+    @trigger("show")
+    @$el.height(0)
+
+  onHide: ->
+    df( "onHide", @ )
+    @$el.hide()
+    #@parent.replace("hide")
+    @trigger("hide")
+    @$el.show()
+#}}}

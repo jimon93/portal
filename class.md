@@ -34,6 +34,7 @@
         - GadgetUserConfig #Modalとか使ってみる
 
 
+子が親に情報を渡したい時はEventsを利用する
 gadgetのメニューはどう変更するべきか
 renderとremoveについて
 * render

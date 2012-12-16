@@ -49,28 +49,27 @@
           .navbar-inner
             %a.brand
               [[= title ]]
-        .menu.well.collapse
-          %ul.nav.nav-list
-            %li.nav-header
-              Menu
-            %li.config
-              %a
-                %i.icon-cog
-                設定する
-            %li.resize
-              %a
-                %i.icon-resize-full
-                復元する
-            %li.minimize
-              %a
-                %i.icon-resize-small
-                最小化する
-            %li.maximize
-              %a(href="#gadget/[[= id ]]")
-                %i.icon-fullscreen
-                全画面にする
-            %li.delete
-              %a
-                %i.icon-trash
-                削除する
-        .content
+      %script#gadget-menu(type="text/template")
+        %ul.nav.nav-list
+          %li.nav-header
+            Menu
+          %li.config
+            %a
+              %i.icon-cog
+              設定する
+          %li.resize
+            %a
+              %i.icon-resize-full
+              復元する
+          %li.minimize
+            %a
+              %i.icon-resize-small
+              最小化する
+          %li.maximize
+            %a(href="#gadget/[[= id ]]")
+              %i.icon-fullscreen
+              全画面にする
+          %li.delete
+            %a
+              %i.icon-trash
+              削除する
