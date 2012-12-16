@@ -1,3 +1,4 @@
+debug = true
 do ($ = jQuery)->
   $ ->
     # template

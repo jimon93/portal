@@ -18,6 +18,7 @@ class BaseView extends Backbone.View
     )
 
   render:->
+    df( "render(super)", @ )
     if @templateSelector?
     then @$el.html @template( @model?.toJSON() or @collection?.toJSON() )
     else @$el.html ''
@@ -25,6 +26,7 @@ class BaseView extends Backbone.View
     return @$el
 
   add:(model)->
+    df( "add(super)", @ )
     item = @makeChildView( model )
     if @collection?.comparator?
       index = @collection.sortedIndex( model, @collection.comparator )
@@ -37,6 +39,7 @@ class BaseView extends Backbone.View
     return item
 
   resize:(next)->
+    df( "resize(super)", @ )
     prev = @span
     @$el.show() if prev == 0
     @$el.removeClass("span#{prev}").addClass("span#{next}")
@@ -45,12 +48,14 @@ class BaseView extends Backbone.View
     @span = next
 
   container:->
-		# リファクタリングすべき
+    df( "container(super)", @ )
+    # リファクタリングすべき
     if @containerSelector?
     then @$(@containerSelector)
     else @$el
 
   template:->
+    df( "template(super)", @ )
     @compiled(@templateSelector).apply @, arguments
 
   compiled: _.memoize (selector)->

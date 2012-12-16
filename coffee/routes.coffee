@@ -11,17 +11,18 @@ class JimonPortalRouter extends Backbone.Router
     @[key] = opt[key] for key in ["home"]
 
   home_list:->
-    @home.unset("foucs",{silent:true})
+    info "router", "home"
+    @home.unset("focus",{silent:true})
+    @home.unset("mode",{silent:true})
     @home.set("mode","list")
 
   home_grid:->
-    @home.unset("foucs",{silent:true})
+    info "router", "grid"
+    @home.unset("focus",{silent:true})
+    @home.unset("mode",{silent:true})
     @home.set("mode","grid")
 
   gadget:(id)->
-    #console.log "route", "gadget", id
+    info "route", "gadget", "id=#{id}"
     id = parseInt(id)
-    @home.set("foucs",id,{silent:true})
-    #console.log "route gadget", @home.get('foucs') , @home.previous('foucs')
-    @home.unset('mode',{silent:true}) if @home.get('foucs') != @home.previous('foucs')
-    @home.set("mode","full")
+    @home.set("focus",id)
