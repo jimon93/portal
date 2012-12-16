@@ -2,36 +2,43 @@ class HomeBaseView extends BaseView
 
 # HomeView {{{
 class HomeView extends HomeBaseView
+  containerSelector: ">.row"
+
   initialize: ->
     # field
     @subView = new HomeSubView {
-      el: @$(".sub")
-    }
-    @homeViewSwitch = new HomeViewSwitch {
-      el: @$("#home-view-switch")
-    }
-    @gadgetNavs = new GadgetNavs {
+      #el: @$(".sub")
       collection: @collection
-      el: @$('#gadgets-nav')
     }
     @gadgetIframes = new GadgetIframes {
       collection: @collection
-      el: @$('#gadgets')
+      #el: @$('#gadgets')
     }
+    # init
+    @render()
 
-    @homeViewSwitch.render()
+  render:->
+    @$el.append("<div class='row' />")
+    @container().append @subView.render()
+    @container().append @gadgetIframes.render()
 # }}}
 # HomeSubView {{{
 class HomeSubView extends HomeBaseView
+  className: "sub"
+
   initialize: ->
     super
     # field
+    @homeViewSwitch = new HomeViewSwitch()
+    @gadgetNavs = new GadgetNavs { collection: @collection }
     # event
     @home.on       "change:mode", @resize
     @responsive.on "change:size", @resize
 
   render:->
-
+    @$el.append @homeViewSwitch.render()
+    @$el.append @gadgetNavs.render()
+    return @$el
 
   resize:->
     next = switch @home.get('mode')
@@ -51,6 +58,10 @@ class HomeSubView extends HomeBaseView
 class HomeViewSwitch extends HomeBaseView
   #tagName: 'div'
   id: "home-view-switch"
+  className: [
+    "btn-toolbar"
+    "hidden-phone"
+  ].join(" ")
   templateSelector: "#templates #home-view-switch-tmpl"
 
   initialize: ->
@@ -66,7 +77,13 @@ class HomeViewSwitch extends HomeBaseView
 # }}}
 # GadgetNavs {{{
 class GadgetNavs extends HomeBaseView
-  tagName: 'ul'
+  tagName   : 'ul'
+  id        : "gadgets-nav"
+  className : [
+    "nav"
+    "nav-tabs"
+    "nav-stacked"
+  ].join(' ')
 
   initialize: ->
     super
@@ -80,7 +97,7 @@ class GadgetNavs extends HomeBaseView
     # init
     @$el.sortable @sortable_options()
     @$el.disableSelection()
-    @render()
+    #@render()
 
   makeChildView: _.memoize(
     (model)-> new GadgetNavsItem {model}
@@ -120,7 +137,10 @@ class GadgetNavsItem extends HomeBaseView
 # }}}
 # GadgetIframes {{{
 class GadgetIframes extends HomeBaseView
+  id: "gadgets"
+  className: "main"
   containerSelector:".row"
+
   initialize: ->
     super
     # bind
@@ -134,12 +154,13 @@ class GadgetIframes extends HomeBaseView
     @responsive.on "change:size", @resize
     @responsive.on 'changed:size', _.bind(@replace,@,"changed:size")
     # init
-    @render()
     $.iframeMonitor.option { callback : _.bind(@replace,@,"iframe") }
 
   render: ->
-    #super
+    super
+    @$el.append("<div class='row' />")
     @collection.each @add
+    return @$el
 
   add:(model)->
     child = super

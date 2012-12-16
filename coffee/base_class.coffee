@@ -18,10 +18,11 @@ class BaseView extends Backbone.View
     )
 
   render:->
-    data = @model?.toJSON() or @collection?.toJSON()
-    @$el.html @template( data )
+    if @templateSelector?
+    then @$el.html @template( @model?.toJSON() or @collection?.toJSON() )
+    else @$el.html ''
     @collection.each( @add ) if @collection?
-    return @
+    return @$el
 
   add:(model)->
     item = @makeChildView( model )
@@ -44,6 +45,7 @@ class BaseView extends Backbone.View
     @span = next
 
   container:->
+		# リファクタリングすべき
     if @containerSelector?
     then @$(@containerSelector)
     else @$el
