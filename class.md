@@ -18,9 +18,9 @@
         - list
         - grid
         - full
-    * sub-span
-    * main-span
-    * gadget-span
+    * focus
+        現在注目しているガジェット
+        fullモードで使用
 
 #view
 * HomeView
@@ -33,6 +33,12 @@
         - GadgetIframe::gadget-span
         - GadgetUserConfig #Modalとか使ってみる
 
+
+gadgetのメニューはどう変更するべきか
+renderとremoveについて
+* render
+    renderは更新の為に呼ばれる
+    -> create & update
+
 * Market
 
-##spanの変更

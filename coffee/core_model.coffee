@@ -29,7 +29,6 @@ class Responsive extends BaseModel
 
   resize: (e)->
     width = $(window).width()
-    prevSize = @get( 'size' )
     nextSize = if width >= 1200
       'large'
     else if width >= 980
@@ -39,4 +38,3 @@ class Responsive extends BaseModel
     else
       'phones'
     @set( 'size', nextSize )
-    @trigger( 'changed:size', @ ) if prevSize != nextSize

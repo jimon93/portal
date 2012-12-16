@@ -20,10 +20,6 @@
     .navbar.navbar-inverse.navbar-fixed-top
       .navbar-inner
         .container
-          %a.btn.btn-navbar{"data-toggle"=>"callapse","data-target"=>".nav-callapse"}
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
           %a.brand{:href=>"##"} Jimon Portal
           .nav-callapse.callapse
             %ul.nav
@@ -40,28 +36,48 @@
       .row
         .sub
           #home-view-switch.btn-toolbar.hidden-phone
-            .btn-group{"data-toggle"=>"buttons-radio"}
-              %a#list.btn{:href=>"#list"}
-                %i.icon-list
-                リスト
-              %a#grid.btn{:href=>"#"}
-                %i.icon-th
-                ミニビュー
           %ul#gadgets-nav.nav.nav-tabs.nav-stacked
         #gadgets.main
           .row
     #templates
-      %script#gadget-header{:type=>"text/template"}
-        %p.title.alert.alert-info
-          <%= title %>
-      %script#gadget-menu{:type=>"text/template"}
-        .btn-group.pull-right
-          %a.btn.btn-info.dropdown-toggle{"data-toggle"=>"toggle",:href=>"#menu"}
-            %i.icon-tasks
-          %ul.dropdown-menu
-            %li
-              %a{:href=>"#hoge"} Action
-            %li
-              %a{:href=>"#hoge"} Action
-            %li
-              %a{:href=>"#hoge"} Action
+      %script#home-view-switch-tmpl(type="text/template")
+        .btn-group(data-toggle="buttons-radio")
+          %a#list.btn{:href=>"#list"}
+            %i.icon-list
+            リスト
+          %a#grid.btn{:href=>"#"}
+            %i.icon-th
+            ミニビュー
+      %script#gadget-navs-item(type="text/template")
+        %a(href="#gadget/[[= id ]]")
+          [[= title ]]
+      %script#gadget-header(type="text/template")
+        .navbar.title
+          .navbar-inner
+            %a.brand
+              [[= title ]]
+        .menu.well.collapse
+          %ul.nav.nav-list
+            %li.nav-header
+              Menu
+            %li.config
+              %a
+                %i.icon-cog
+                設定する
+            %li.resize
+              %a
+                %i.icon-resize-full
+                復元する
+            %li.minimize
+              %a
+                %i.icon-resize-small
+                最小化する
+            %li.maximize
+              %a(href="#gadget/[[= id ]]")
+                %i.icon-fullscreen
+                全画面にする
+            %li.delete
+              %a
+                %i.icon-trash
+                削除する
+        .content

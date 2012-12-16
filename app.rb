@@ -8,8 +8,9 @@ COFFEE = [
   'utl',
   'iframe',
   'extend_methods',
-  'model',
-  'view',
+  'base_class',
+  'core_model',
+  'homeview',
   "routes",
   'jimon_portal'
 ]

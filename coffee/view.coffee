@@ -1,3 +1,4 @@
+###
 # Home {{{
 class Home extends Backbone.Model
   change:(options)->
@@ -7,6 +8,7 @@ class Home extends Backbone.Model
     for key, val of changes when val
       @trigger("changed:#{key}",@ ,@get(key), options)
 # }}}
+###
 # HomeView {{{
 class HomeView extends Backbone.View
   initialize:(options)->

@@ -20,6 +20,9 @@ do ($ = jQuery)->
       #@options.callback.call @, @iframes if resized
       return this
 
+    remove:(iframe)->
+      @iframes = _.without(@iframes,iframe)
+
     start:->
       @resize() if timerID?
       return this

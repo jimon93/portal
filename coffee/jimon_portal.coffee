@@ -1,20 +1,26 @@
 do ($ = jQuery)->
   $ ->
+    # template
+    _.templateSettings = {
+      evaluate    : /\[\[([\s\S]+?)\]\]/g,
+      interpolate : /\[\[=([\s\S]+?)\]\]/g,
+      escape      : /\[\[-([\s\S]+?)\]\]/g
+    }
     # models & collections
     responsive = new Responsive()
     gadgets = new Gadgets()
-    home = new Home()
+    home = new BaseModel()
     # router
     router = new JimonPortalRouter {
       home
     }
     # views
-    homeView = new HomeView {
+    BaseView::responsive = responsive
+    HomeBaseView::home = home
+    HomeBaseView::router = router
+    window.homeView = new HomeView {
       collection: gadgets
       el: $("#home")
-      home
-      responsive
-      router
     }
     #Backbone.history.start()
     Backbone.history.start {

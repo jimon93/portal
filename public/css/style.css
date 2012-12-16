@@ -29,11 +29,54 @@
 }
 .gadget .title{
   margin-bottom: 0px;
+  cursor: pointer;
+}
+.gadget .title .navbar-inner{
   -webkit-border-radius : 4px 4px 0 0;
   -moz-border-radius    : 4px 4px 0 0;
   border-radius         : 4px 4px 0 0;
 }
-.gadget iframe{
+.gadget .title .single{
+  -webkit-border-radius : 4px;
+  -moz-border-radius    : 4px;
+  border-radius         : 4px;
+}
+.gadget .menu{
+  padding: 0;
+  margin-bottom: 0px;
+  -webkit-border-radius : 0;
+  -moz-border-radius    : 0;
+  border-radius         : 0;
+  min-height:0px;
+  border-width: 0px 1px;
+}
+.gadget .menu a{
+  cursor: pointer;
+}
+.gadget .menu.in{
+  border-width: 1px;
+}
+.gadget .content{
+  border-color: #D4D4D4;
+  border-style: solid;
+  border-width: 0 1px 1px 1px;
+  -webkit-border-radius : 0 0 4px 4px;
+  -moz-border-radius    : 0 0 4px 4px;
+  border-radius         : 0 0 4px 4px;
+}
+.gadget .content iframe{
   width: 100%;
 }
 
+/* common rewrite */
+html{
+  overflow-y: scroll;
+}
+.nav-tabs > .active > a,
+.nav-tabs > .active > a:hover {
+  color: #ffffff;
+  background-color: #0088cc;
+  cursor: default;
+  border: 1px solid #ddd;
+  border-bottom-color: transparent;
+}
