@@ -11,13 +11,13 @@ class JimonPortalRouter extends Backbone.Router
     @[key] = opt[key] for key in ["home"]
 
   home_list:->
-    info "router", "home"
+    info "router", "home/list"
     @home.unset("focus",{silent:true})
     @home.unset("mode",{silent:true})
     @home.set("mode","list")
 
   home_grid:->
-    info "router", "grid"
+    info "router", "home/grid"
     @home.unset("focus",{silent:true})
     @home.unset("mode",{silent:true})
     @home.set("mode","grid")

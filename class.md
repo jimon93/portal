@@ -40,5 +40,11 @@ renderとremoveについて
     renderは更新の為に呼ばれる
     -> create & update
 
+* Modal
+    要素がdocumentに無くても起動は可能
+    ただしゴミがdocumentに溜まっていくので消していく必要あり
+
+* GadgetMenuは分割するべきか
+
 * Market
 

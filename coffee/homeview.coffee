@@ -41,7 +41,6 @@ class HomeSubView extends HomeBaseView
 
   resize:->
     df( "resize", @ )
-    @$el.append @homeViewSwitch.render()
     next = if @home.get("focus")?
       switch @responsive.get('size')
         when 'large', 'desktops' then 3
@@ -58,13 +57,12 @@ class HomeSubView extends HomeBaseView
 # }}}
 # HomeViewSwitch {{{
 class HomeViewSwitch extends HomeBaseView
-  #tagName: 'div'
   id: "home-view-switch"
   className: [
     "btn-toolbar"
     "hidden-phone"
   ].join(" ")
-  templateSelector: "#templates #home-view-switch-tmpl"
+  templateSelector: "#templates>#home-view-switch-tmpl"
 
   initialize: ->
     df( "initialize", @ )
@@ -102,15 +100,12 @@ class GadgetNavs extends HomeBaseView
     super
     # bind
     _.bindAll @, 'makeChildView'
-
     # event
     @collection.on 'reset', @render
     @collection.on 'add', @add
-
     # init
     @$el.sortable @sortable_options()
     @$el.disableSelection()
-    #@render()
 
   makeChildView: _.memoize(
     (model)-> new GadgetNavsItem {model}
@@ -156,8 +151,7 @@ class GadgetIframes extends HomeBaseView
   id: "gadgets"
   className: "main"
   containerSelector:".row"
-
-  initialize: ->
+  initialize: -> #{{{
     df( "initialize", @ )
     super
     # bind
@@ -174,25 +168,25 @@ class GadgetIframes extends HomeBaseView
     @responsive.on 'changed:size', @replace
     # init
     $.iframeMonitor.option { callback : @replace }
-
-  render: ->
+  #}}}
+  render: -> #{{{
     df( "render", @ )
     super
     @$el.append("<div class='row' />")
     @collection.each @add
     return @$el
-
-  add:(model)->
+  #}}}
+  add:(model)-> #{{{
     df( "add", @ )
     super
     @replace(false)
-
-  makeChildView: _.memoize(
+  #}}}
+  makeChildView: _.memoize( #{{{
     (model)-> new GadgetIframe { model, parent:@ }
     (model)-> model.id
   )
-
-  replace: (animate = true)->
+  #}}}
+  replace: (animate = true)-> #{{{
     df( "replace", @ )
     # 要リファクタリング
     _container = @container()
@@ -206,8 +200,8 @@ class GadgetIframes extends HomeBaseView
       _container.masonry 'option', {isAnimated: false} if !animate
       _container.masonry('sortreload')
       _container.masonry 'option', {isAnimated: true}  if !animate
-
-  resize:->
+  #}}}
+  resize:-> #{{{
     df( "resize", @ )
     next = if @home.get("focus")?
       switch @responsive.get('size')
@@ -222,6 +216,7 @@ class GadgetIframes extends HomeBaseView
             when 'tablets' then 8
             when 'phones' then 0
     super next
+  #}}}
 # }}}
 # GadgetIframe {{{
 class GadgetIframe extends HomeBaseView
@@ -336,15 +331,15 @@ class GadgetIframe extends HomeBaseView
     if @home.get("focus")?
       @$(".menu .resize"  ).hide()
       @$(".menu .minimize").hide()
+      @$(".menu .maximize").hide()
       @$(".content").show()
       @$(".title .navbar-inner").removeClass("single")
-      @$(".menu .maximize").hide()
     else if @home.get('mode') == "grid"
       @$(".menu .resize"       )[if @minimize then 'show' else 'hide']()
       @$(".menu .minimize"     )[if @minimize then 'hide' else 'show']()
+      @$(".menu .maximize").show()
       @$(".content"            )[if @minimize then 'hide' else 'show']()
       @$(".title .navbar-inner")[if @minimize then 'addClass' else 'removeClass']("single")
-      @$(".menu .maximize").show()
 
   menuConfig:->
     df( "menuConfig", @ )
