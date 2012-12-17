@@ -1,14 +1,9 @@
 class BaseModel extends Backbone.Model
-  change:(options)->
-    changes = _.extend({}, options.changes, @_silent)
-    #console.log "my change",changes
-    super
-    for key, val of changes when val
-      @trigger("changed:#{key}",@ ,@get(key), options)
 
 class BaseView extends Backbone.View
   initialize:->
     _.bindAll( @
+      "routes"
       "render"
       "add"
       "resize"
@@ -16,14 +11,24 @@ class BaseView extends Backbone.View
       "template"
       "compiled"
     )
+    # field
+    @children = {}
+
+  routes:(route)->
+    route.replace(/^route:/,'')
 
   render:->
     df( "render(super)", @ )
     if @templateSelector?
     then @$el.html @template( @model?.toJSON() or @collection?.toJSON() )
     else @$el.html ''
-    @collection.each( @add ) if @collection?
-    return @$el
+    @collection.each( @add ) if @collection? and @makeChildView?
+    return @
+
+  remove:->
+    @$el.detach()
+    @stopListening()
+    return @
 
   add:(model)->
     df( "add(super)", @ )
@@ -36,6 +41,7 @@ class BaseView extends Backbone.View
     else
       @container().append( item.el )
     item.render()
+    @children[item.cid] = item
     return item
 
   resize:(next)->

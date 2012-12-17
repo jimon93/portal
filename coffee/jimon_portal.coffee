@@ -3,16 +3,18 @@ do ($ = jQuery)->
   $ ->
     # template
     _.templateSettings = {
-      evaluate    : /\[\[([\s\S]+?)\]\]/g,
-      interpolate : /\[\[=([\s\S]+?)\]\]/g,
+      evaluate    : /\[\[([\s\S]+?)\]\]/g
+      interpolate : /\[\[=([\s\S]+?)\]\]/g
       escape      : /\[\[-([\s\S]+?)\]\]/g
     }
     # models & collections
-    responsive = new Responsive()
-    gadgets = new Gadgets()
-    home = new BaseModel()
+    window.responsive = new Responsive()
+    window.gadgets = new Gadgets()
+    window.home = new BaseModel {
+      mode: "grid"
+    }
     # router
-    router = new JimonPortalRouter {
+    window.router = new JimonPortalRouter {
       home
     }
     # views
@@ -21,7 +23,6 @@ do ($ = jQuery)->
     HomeBaseView::router = router
     window.homeView = new HomeView {
       collection: gadgets
-      el: $("#home")
     }
     #Backbone.history.start()
     Backbone.history.start {

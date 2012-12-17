@@ -2,21 +2,43 @@ class HomeBaseView extends BaseView
 
 # HomeView {{{
 class HomeView extends HomeBaseView
+  id:"home"
+  className:"container"
   containerSelector: ">.row"
 
   initialize: ->
     df( "initialize", @ )
+    super
     # field
     @subView = new HomeSubView { collection: @collection }
     @gadgetIframes = new GadgetIframes { collection: @collection }
-    # init
-    @render()
+    # events
+    @router.on("all",@routes)
+
+  routes:->
+    df( "routes", @ )
+    switch super
+      when 'home', 'gadget' then @render()
+      else @remove()
 
   render:->
-    df( "render", @ )
-    @$el.append("<div class='row' />")
-    @container().append @subView.render()
-    @container().append @gadgetIframes.render()
+    if !@rendered
+      df( "render", @ )
+      @$el.appendTo( $("body") )
+      super
+      @$el.append("<div class='row' />")
+      @container().append @subView.render().$el
+      #@container().append @gadgetIframes.render().$el
+      @rendered = true
+      return @
+
+  remove:->
+    df( "remove", @ )
+    if @rendered
+      @subView.remove()
+      @rendered = false
+      @gadgetIframes.remove()
+      super
 # }}}
 # HomeSubView {{{
 class HomeSubView extends HomeBaseView
@@ -25,35 +47,44 @@ class HomeSubView extends HomeBaseView
   initialize: ->
     df( "initialize", @ )
     super
+    _.bindAll( @, "onHome", "onGadget" )
     # field
     @homeViewSwitch = new HomeViewSwitch()
     @gadgetNavs = new GadgetNavs { collection: @collection }
-    # event
-    @home.on       "change:mode", @resize
-    @home.on       "change:focus", @resize
-    @responsive.on "change:size", @resize
 
   render:->
     df( "render", @ )
-    @$el.append @homeViewSwitch.render()
-    @$el.append @gadgetNavs.render()
-    return @$el
+    # rendering
+    @$el.append @homeViewSwitch.render().$el
+    @$el.append @gadgetNavs.render().$el
+    # event
+    @listenTo( @home       , "change:mode"  , @onHome )
+    @listenTo( @router     , "route:home"   , @onHome )
+    @listenTo( @router     , "route:gadget" , @onGadget )
+    @listenTo( @responsive , "change:size"  , @resize )
+    # init
+    return @
 
-  resize:->
-    df( "resize", @ )
-    next = if @home.get("focus")?
-      switch @responsive.get('size')
-        when 'large', 'desktops' then 3
-        when 'tablets', 'phones' then 0
-    else
-      switch @home.get('mode')
-        when 'list' then 12
-        when 'grid'
-          switch @responsive.get('size')
-            when 'large', 'desktops' then 3
-            when 'tablets' then 4
-            when 'phones' then 12
-    super next
+  onHome:->
+    next = switch @home.get('mode')
+      when 'list' then 12
+      when 'grid'
+        switch @responsive.get('size')
+          when 'large', 'desktops' then 3
+          when 'tablets' then 4
+          when 'phones' then 12
+    @resize( next )
+
+  onGadget:->
+    next = switch @responsive.get('size')
+      when 'large', 'desktops' then 3
+      when 'tablets', 'phones' then 0
+    @resize( next )
+
+  remove:->
+    @homeViewSwitch.remove()
+    @gadgetNavs.remove()
+    super
 # }}}
 # HomeViewSwitch {{{
 class HomeViewSwitch extends HomeBaseView
@@ -64,17 +95,35 @@ class HomeViewSwitch extends HomeBaseView
   ].join(" ")
   templateSelector: "#templates>#home-view-switch-tmpl"
 
+  events: {
+    "click a": "switch"
+  }
+
   initialize: ->
     df( "initialize", @ )
     super
     # bind
     _.bindAll( @
+      "switch"
       "onMode"
       "onFocus"
     )
+
+  render:->
+    df( "render", @ )
+    super
     # event
-    @home.on "change:mode", @onMode
-    @home.on "change:focus", @onFocus
+    @listenTo( @home   , "change:mode"  , @onMode )
+    @listenTo( @router , "route:home"   , @onMode )
+    @listenTo( @router , "route:gadget" , @onFocus )
+    return @
+
+  switch:(e)->
+    df( "switch", @ )
+    mode = $(e.currentTarget).data("mode")
+    @home.set("mode", mode)
+    @router.navigate("/", {trigger:true})
+    return false
 
   onMode:->
     df( "onMode", @ )
@@ -83,7 +132,7 @@ class HomeViewSwitch extends HomeBaseView
 
   onFocus:->
     df( "onFocus", @ )
-    @$("##{@home.get('mode')}").removeClass("active") if @home.get("focus")?
+    @$("##{@home.get('mode')}").removeClass("active")
 # }}}
 # GadgetNavs {{{
 class GadgetNavs extends HomeBaseView
@@ -100,12 +149,16 @@ class GadgetNavs extends HomeBaseView
     super
     # bind
     _.bindAll @, 'makeChildView'
-    # event
-    @collection.on 'reset', @render
-    @collection.on 'add', @add
     # init
     @$el.sortable @sortable_options()
     @$el.disableSelection()
+
+  render:->
+    super
+    # event
+    @listenTo( @collection, 'reset', @render )
+    @listenTo( @collection, 'add', @add )
+    return @
 
   makeChildView: _.memoize(
     (model)-> new GadgetNavsItem {model}
@@ -120,6 +173,10 @@ class GadgetNavs extends HomeBaseView
       @$el.children().each (i)-> $(@).data('gadget').set('priority',i)
       @collection.trigger('sorted',@collection)
   }
+
+  remove:->
+    child.remove() for cid, child of @children
+    super
 # }}}
 # GadgetNavsItem {{{
 class GadgetNavsItem extends HomeBaseView
@@ -133,16 +190,22 @@ class GadgetNavsItem extends HomeBaseView
     _.bindAll( @, 'active' )
     # field
     @$el.data("gadget",@model)
-    # event
-    #@home.on("change:mode",@active)
-    @home.on("change:focus",@active)
-    @model.on "remove", => @remove()
     # init
     @active()
 
-  active:->
+  render:->
+    super
+    # event
+    #@listenTo( @home, "change:focus",@active)
+    @listenTo( @router, "route:home", @active )
+    @listenTo( @router, "route:gadget", @active )
+    @listenTo( @model, "remove", @remove )
+    return @
+
+  active:(focus)->
     df( "active", @ )
-    focus = @home.get("focus")
+    focus = parseInt(focus)
+    #focus = @home.get("focus")
     #console.log "active", @model.id, focus == @model.id
     @$el[if focus? and focus == @model.id then "addClass" else "removeClass"]("active")
 # }}}
@@ -156,16 +219,6 @@ class GadgetIframes extends HomeBaseView
     super
     # bind
     _.bindAll( @, 'replace')
-    # event
-    @collection . on( 'reset'         , @render )
-    @collection . on( 'add'           , @add )
-    @collection . on( 'sorted'        , @replace )
-    @home       . on( "change:mode"   , @resize )
-    @home       . on( "change:focus"  , @resize )
-    @home       . on( "changed:mode"  , @replace )
-    @home       . on( "changed:focus" , @replace )
-    @responsive . on( "change:size"   , @resize )
-    @responsive . on( 'changed:size'  , @replace )
     # init
     $.iframeMonitor.option { callback : @replace }
   #}}}
@@ -173,14 +226,21 @@ class GadgetIframes extends HomeBaseView
     df( "render", @ )
     super
     @$el.append("<div class='row' />")
+    # event
+    @listenTo( @collection, 'reset'        , @render )
+    @listenTo( @collection, 'add'          , @add )
+    @listenTo( @collection, 'sorted'       , @replace )
+    @listenTo( @home      , "change:mode"  , @resize )
+    @listenTo( @home      , "change:focus" , @resize )
+    @listenTo( @responsive, "change:size"  , @resize )
     @collection.each @add
-    return @$el
+    return @
   #}}}
   add:(model)-> #{{{
     df( "add", @ )
-    view = super
-    view.on("change:height", @replace)
-    view.on("delete", @collection.remove, @collection)
+    child = super
+    child.on("change:height", @replace)
+    child.on("delete", @collection.remove, @collection)
     @replace(false)
   #}}}
   makeChildView: _.memoize( #{{{
@@ -218,8 +278,12 @@ class GadgetIframes extends HomeBaseView
             when 'tablets' then 8
             when 'phones' then 0
     super next
+    child.resize() for cid, child of @children
+    @replace()
   #}}}
 
+  remove:->
+    child.remove() for cid, child of @children
 # }}}
 # GadgetIframe {{{
 class GadgetIframe extends HomeBaseView
@@ -244,28 +308,25 @@ class GadgetIframe extends HomeBaseView
     )
     # field
     @menu = new GadgetMenu { model: @model }
-    # event
-    @model     .on( "remove"       , @onRemove )
-    @home      .on( "change:mode"  , @resize )
-    @home      .on( "change:mode"  , @onMinimize )
-    @home      .on( "change:focus" , @resize )
-    @home      .on( "change:focus" , @onMinimize ) # resize ‚Æ onMinimize‚Í“‡‚·‚é‚×‚«‚©
-    @responsive.on( "change:size"  , @resize )
-    @menu      .on( "show"         , @changedHeight )
-    @menu      .on( "hide"         , @changedHeight )
-    @menu      .on( "change:minimize", @onMinimize )
-    @menu      .on( "delete"       , @delete )
     # init
     @$el.data 'gadget', @model
 
   render:->
     df( "render", @ )
     super
-    @$el.append @menu.render()
+    @$el.append @menu.render().$el
     @$el.append "<div class='content'/>"
-    @iframe = @$('.content').iframe(@makeSrc()).monitor()
+    #@iframe = @$('.content').iframe(@makeSrc()).monitor()
     @resize()
-    return @$el
+    # event
+    @listenTo( @model, "remove"          , @onRemove )
+    @listenTo( @home , "change:mode"     , @onMinimize )
+    @listenTo( @home , "change:focus"    , @onMinimize ) # resize ã¨ onMinimizeã¯çµ±åˆã™ã‚‹ã¹ãã‹
+    @listenTo( @menu , "show"            , @changedHeight )
+    @listenTo( @menu , "hide"            , @changedHeight )
+    @listenTo( @menu , "change:minimize" , @onMinimize )
+    @listenTo( @menu , "delete"          , @delete )
+    return @
 
   resize:->
     df( "resize", @ )
@@ -331,6 +392,9 @@ class GadgetIframe extends HomeBaseView
     df( "delete", @ )
     @trigger("delete",@model)
   #}}}
+  remove:->
+    @menu.remove()
+    super
 # }}}
 # GadgetMenu {{{
 class GadgetMenu extends HomeBaseView
@@ -369,18 +433,18 @@ class GadgetMenu extends HomeBaseView
     )
     # field
     @minimizeMode = false
-    # event
-    @home.on("change:mode" ,@update)
-    @home.on("change:focus",@update)
-    @home.on("change:mode" ,@fastHide)
-    @home.on("change:focus",@fastHide)
     # init
     @$el.collapse({toggle:false})
 
   render:->
     super
     @update()
-    return @$el
+    # event
+    @listenTo( @home, "change:mode" ,@update)
+    @listenTo( @home, "change:focus",@update)
+    @listenTo( @home, "change:mode" ,@fastHide)
+    @listenTo( @home, "change:focus",@fastHide)
+    return @
 
   toggle:->
     df( "toggle", @ )

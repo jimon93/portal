@@ -20,25 +20,24 @@
     .navbar.navbar-inverse.navbar-fixed-top
       .navbar-inner
         .container
-          %a.brand{:href=>"##"} Jimon Portal
+          %a.brand{:href=>"/"} Jimon Portal
           .nav-callapse.callapse
             %ul.nav
               %li.active
-                %a{:href=>"/#home"}
+                %a{:href=>"/"}
                   %i.icon-home
                   Home
               %li
-                %a{:href=>"/#market"}
+                %a{:href=>"/market"}
                   %i.icon-gift
                   Market
-    #home.container
     #templates
       %script#home-view-switch-tmpl(type="text/template")
         .btn-group(data-toggle="buttons-radio")
-          %a#list.btn{:href=>"#list"}
+          %a#list.btn(href="list" data-mode="list")
             %i.icon-list
             リスト
-          %a#grid.btn{:href=>"#"}
+          %a#grid.btn(href="grid" data-mode="grid")
             %i.icon-th
             ミニビュー
       %script#gadget-navs-item(type="text/template")
