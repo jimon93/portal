@@ -36,4 +36,5 @@ do ($ = jQuery)->
       return false
 
     $.getJSON('/data.json').then (data)->
-      repeat data.gadgets, (gadget)-> gadgets.add gadget
+      #repeat data.gadgets, (gadget)-> gadgets.add gadget
+      gadgets.add data.gadgets

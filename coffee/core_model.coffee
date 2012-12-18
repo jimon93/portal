@@ -24,7 +24,8 @@ class Gadgets extends Backbone.Collection
 class Responsive extends BaseModel
   initialize:->
     _.bindAll @, 'resize'
-    $(window).resize @resize
+    @debounce_resize = _.debounce( @resize, 100 )
+    $(window).resize @debounce_resize
     @resize()
 
   resize: (e)->

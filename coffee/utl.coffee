@@ -3,13 +3,13 @@ repeat = (end, func)->
   idx = 0
   if _.isNumber end
     _repeat = ->
-      setTimeout (-> func(idx); _repeat() if ++idx < end) ,1
+      _.defer -> func(idx); _repeat() if ++idx < end
     _repeat() if idx < end
   else if _.isArray end
     collection = end
     end = collection.length
     _repeat = ->
-      setTimeout (-> func(collection[idx]); _repeat() if ++idx < end) ,1
+      _.defer -> func(collection[idx]); _repeat() if ++idx < end
     _repeat() if idx < end
 # }}}
 # debug {{{
@@ -18,5 +18,5 @@ info = ->
 log = ->
   console.log.apply(console,arguments) if debug? and debug
 df = (name,env)-> # debug function
-  console.info( "#{name}::#{env.constructor.name}", env ) if debug? and debug
+  console.info( name,env.constructor.name ) if debug? and debug
 #}}}

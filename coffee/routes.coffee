@@ -10,9 +10,8 @@ class JimonPortalRouter extends Backbone.Router
     @prevTriggerArgs = args
     super
 
-  on: (name, callback, context = @)->
+  refire:(name, callback, context = @)->
     callback.apply( context, @prevTriggerArgs ) if name == @prevTriggerName
-    super
 
   home:->
     info "router", "home"

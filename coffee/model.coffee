@@ -24,10 +24,12 @@ class Gadgets extends Backbone.Collection
 class Responsive extends BaseModel
   initialize:->
     _.bindAll @, 'resize'
-    $(window).resize @resize
+    @resize = _.throttle( @resize, 1000 )
+    $(window).resize( @resize )
     @resize()
 
   resize: (e)->
+    df( "resize(check)", @ )
     width = $(window).width()
     prevSize = @get( 'size' )
     nextSize = if width >= 1200

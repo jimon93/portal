@@ -2,37 +2,38 @@ class BaseModel extends Backbone.Model
 
 class BaseView extends Backbone.View
   initialize:->
-    _.bindAll( @
-      "routes"
-      "render"
-      "add"
-      "resize"
-      "container"
-      "template"
-      "compiled"
-    )
-    # field
+    _.bindAll( @ )
     @children = {}
 
   routes:(route)->
     route.replace(/^route:/,'')
 
   render:->
-    df( "render(super)", @ )
-    if @templateSelector?
-    then @$el.html @template( @model?.toJSON() or @collection?.toJSON() )
-    else @$el.html ''
-    @collection.each( @add ) if @collection? and @makeChildView?
+    @$el.html @template( @model?.toJSON() or @collection?.toJSON() or {} )
+    @appendChildView()
+    @deligateEvent()
+    @collection.each( @add ) if @collection? and @getChildView?
+    @rendered()
     return @
 
+  appendChildView:->
+  deligateEvent:->
+  rendered:->
+
   remove:->
+    #child.remove() for cid, child of @children
+    if @collection? and @getChildView?
+      @collection.each (model)=> @getChildView(model).remove()
     @$el.detach()
     @stopListening()
     return @
 
+  rewrite:->
+    #child.remove() for cid, child of @children
+    @render()
+
   add:(model)->
-    df( "add(super)", @ )
-    item = @makeChildView( model )
+    item = @getChildView( model )
     if @collection?.comparator?
       index = @collection.sortedIndex( model, @collection.comparator )
       switch index
@@ -45,7 +46,6 @@ class BaseView extends Backbone.View
     return item
 
   resize:(next)->
-    df( "resize(super)", @ )
     prev = @span
     @$el.show() if prev == 0
     @$el.removeClass("span#{prev}").addClass("span#{next}")
@@ -54,20 +54,24 @@ class BaseView extends Backbone.View
     @span = next
 
   container:->
-    df( "container(super)", @ )
     # リファクタリングすべき
     if @containerSelector?
     then @$(@containerSelector)
     else @$el
 
   template:->
-    df( "template(super)", @ )
-    @compiled(@templateSelector).apply @, arguments
+    compiled = if @templateString?
+      @compiled( @templateString, "string" )
+    else if @templateSelector?
+      @compiled( @templateSelector, "selector" )
+    else
+      @compiled( "", "string" )
+    compiled.apply(@, arguments)
 
-  compiled: _.memoize (selector)->
-    if selector?
-    then _.template $(selector).html()
-    else -> ''
+  compiled: _.memoize (string, type)->
+    switch type
+      when "string"   then _.template string
+      when "selector" then _.template $(string).html()
 
   getValue: (val)->
     if _.isFunction val
