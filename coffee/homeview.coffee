@@ -94,6 +94,10 @@ class HomeViewSwitch extends HomeBaseView
     @listenTo( @router , "route:home"   , @onMode )
     @listenTo( @router , "route:gadget" , @onFocus )
 
+  renderd:->
+    @router.refire( "route:home", @onMode )
+    @router.refire( "route:gadget", @onGadget )
+
   switch:(e)->
     mode = $(e.currentTarget).data("mode")
     @home.set("mode", mode)
@@ -169,8 +173,8 @@ class GadgetIframes extends HomeBaseView
 
   initialize: -> #{{{
     super
-    $.iframeMonitor.option { callback : @replace }
-    @replace = _.throttle @replace, 100
+    $.iframeMonitor.option { callback : _.bind(@replace,@,{silent:false}) }
+    #@replace = _.throttle @replace, 100
   #}}}
   deligateEvent:->
     @listenTo( @collection , 'add'          , @add      )
@@ -186,9 +190,9 @@ class GadgetIframes extends HomeBaseView
 
   add:(model)-> #{{{
     child = super
-    child.on("change:height", @replace)
+    child.on("change:height", @replace )
     child.on("delete", @collection.remove, @collection)
-    @replace(false)
+    @replace()
   #}}}
   getChildView: _.memoize( #{{{
     (model)-> new GadgetIframe { model }
@@ -211,18 +215,20 @@ class GadgetIframes extends HomeBaseView
       when 'large', 'desktops' then 9
       when 'tablets', 'phones' then 12
     @resize( next )
+    _.defer @replace
 
   onWindow:->
     @router.refire( "route:home", @onHome )
     @router.refire( "route:gadget", @onGadget )
 
-  replace: (animate=false)-> #{{{
+  replace: ( opt = {silent:true} )-> #{{{
+    log "replace", opt
     container = @container()
     if not container.is(".masonry")
       container.masonry { itemSelector: '.gadget:visible', isAnimated: true }
-    container.masonry 'option', {isAnimated: false} if !animate
+    container.masonry 'option', {isAnimated: false} if opt.silent
     container.masonry('sortreload')
-    container.masonry 'option', {isAnimated: true}  if !animate
+    container.masonry 'option', {isAnimated: true}  if opt.silent
   #}}}
 # }}}
 # GadgetIframe {{{
@@ -264,7 +270,8 @@ class GadgetIframe extends HomeBaseView
   appendIframe:->
     @$el.append "<div class='content'/>"
     @$('.content').iframe( @makeSrc() ).monitor()
-    @changedHeight()
+    log "appendIframe"
+    @changedHeight({silent:true})
 
   onHome:->
     next = switch @home.get('mode')
@@ -307,10 +314,11 @@ class GadgetIframe extends HomeBaseView
       next = if @home.get("mode") == "grid" then "" else "list"
       @router.navigate(next,{ trigger: true })
     else
-      @changedHeight(0)
+      @changedHeight({silent:false})
   #}}}
-  changedHeight:-> #{{{
-    @trigger("change:height")
+  changedHeight:(opt = {silent:true})-> #{{{
+    log "changedHeight", opt
+    @trigger("change:height",)
   #}}}
   onMinimize:-> #{{{
     if @home.get("focus")?
@@ -332,11 +340,7 @@ class GadgetIframe extends HomeBaseView
 # }}}
 # GadgetMenu {{{
 class GadgetMenu extends HomeBaseView
-  className: [
-    "menu"
-    "well"
-    "collapse"
-  ].join(" ")
+  className: [ "menu", "well", "collapse" ].join(" ")
   templateSelector: "#templates>#gadget-menu"
 
   events: {
@@ -351,9 +355,7 @@ class GadgetMenu extends HomeBaseView
 
   initialize: ->
     super
-    # field
     @minimizeMode = false
-    # init
     @$el.collapse({toggle:false})
 
   deligateEvent:->
@@ -398,20 +400,17 @@ class GadgetMenu extends HomeBaseView
 
   delete:->
     @trigger("delete")
-    #collection.remove @model
 
   fastHide:->
     @$el.height(0).removeClass("in")
 
   onShow: ->
     @$el.height("auto")
-    #@parent.replace("show")
     @trigger("show")
     @$el.height(0)
 
   onHide: ->
     @$el.hide()
-    #@parent.replace("hide")
     @trigger("hide")
     @$el.show()
 #}}}
