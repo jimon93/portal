@@ -92,11 +92,11 @@ class HomeViewSwitch extends HomeBaseView
   deligateEvent:->
     @listenTo( @home   , "change:mode"  , @onMode )
     @listenTo( @router , "route:home"   , @onMode )
-    @listenTo( @router , "route:gadget" , @onFocus )
+    @listenTo( @router , "route:gadget" , @onGadget )
 
-  renderd:->
+  rendered:->
     @router.refire( "route:home", @onMode )
-    @router.refire( "route:gadget", @onGadget )
+    @router.refire( "route:gadget", @onGadge )
 
   switch:(e)->
     mode = $(e.currentTarget).data("mode")
@@ -108,7 +108,7 @@ class HomeViewSwitch extends HomeBaseView
     @$("##{@home.previous('mode')}").removeClass("active")
     @$("##{@home.get('mode')}").addClass("active")
 
-  onFocus:->
+  onGadget:->
     @$("##{@home.get('mode')}").removeClass("active")
 # }}}
 # GadgetNavs {{{
