@@ -94,6 +94,7 @@ class HomeViewSwitch extends HomeBaseView
     @listenTo( @router , "route:home"   , @onMode )
     @listenTo( @router , "route:gadget" , @onGadget )
 
+    #test
   rendered:->
     @router.refire( "route:home", @onMode )
     @router.refire( "route:gadget", @onGadge )
